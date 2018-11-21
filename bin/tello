@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+require 'tello/colorize'
+require 'tello/version'
+
+# Check Command-line Arguments #################################################
+
+usage = "Fly the Tello drone with Ruby!".bold + "\n
+Usage: tello <command> <options>
+             [-v|--version]
+
+Summary of commands and options:
+  console       Open an interactive Tello console
+    --test        Start the console in test mode
+  server        Start the test server
+  -v|--version  Prints the installed version\n\n"
+
+if ARGV.delete '--test' then $tello_testing = true end
+
+case ARGV[0]
+when 'console'
+  require 'tello/cli/console'
+when 'server'
+  require 'tello/cli/server'
+when '-v', '--version'
+  puts Tello::VERSION
+else
+  puts usage
+end
