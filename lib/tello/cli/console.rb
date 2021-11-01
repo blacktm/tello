@@ -7,7 +7,7 @@ else
   r_module = 'tello'
 end
 
-puts "Ready to receive Tello commands. Type \"exit\" to quit."
+puts %Q(Ready to receive Tello#{$edu} commands. Type "exit" to quit.)
 
 if system('pry -v &>/dev/null')
   system("pry -r #{r_module}")

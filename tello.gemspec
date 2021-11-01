@@ -11,4 +11,5 @@ Gem::Specification.new do |s|
   s.email       = 'tom@blacktm.com'
   s.files = Dir.glob('lib/**/*')
   s.executables << 'tello'
+  s.executables << 'telloedu'
 end

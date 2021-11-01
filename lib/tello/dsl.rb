@@ -1,8 +1,10 @@
 # Tello::DSL
 # Define Tello domain-specific language
+require 'timeout'
 
 module Tello
   module DSL
+    TIMEOUT_SEC = 6 # Needs to be tweaked after more testing
 
     # Warn Linux and Windows users to manually connect to Wi-Fi, for now
     unless Tello.os == :macos
@@ -11,8 +13,8 @@ module Tello
     end
 
     # Connect to the drone
-    def connect
-      Tello::Client.connect
+    def connect(ssid=nil, ip=nil, bind_port=nil)
+      Tello::Client.connect(ssid, ip, bind_port)
     end
 
     # Is the drone connected?
@@ -27,7 +29,24 @@ module Tello
 
     # Send a native Tello command to the drone
     def send(s)
-      Tello::Client.send(s)
+      puts s
+      begin
+        ### WARNING: Ruby Timeout considered harmful (according to Dr. Google)
+        Timeout::timeout(TIMEOUT_SEC) { Tello::Client.send(s) }
+      rescue
+        err = $!.to_s
+        puts err unless err == 'execution expired'
+        puts "timeout after #{TIMEOUT_SEC} seconds"
+      end
+    end
+
+    def ap_mode(ssid, passwd)
+      if ssid.to_s.strip.size == 0
+        puts 'Cannot set AP mode when SSID is empty'
+        return false
+      end
+      cmd = "ap #{ssid.to_s} #{passwd.to_s}"
+      send(cmd)
     end
 
     # Check if value is within the common movement range
@@ -36,14 +55,14 @@ module Tello
     end
 
     # Takeoff and land
-    [:takeoff, :land].each do |cmd|
+    [:takeoff, :land, :streamon, :streamoff].each do |cmd|
       define_method cmd do
         Tello::Client.return_bool send("#{cmd.to_s}")
       end
     end
 
     # Move in a given direction
-    [:up, :down, :left, :right, :forward, :backward].each do |cmd|
+    [:up, :down, :left, :right, :forward, :back].each do |cmd|
       define_method cmd do |x|
         if in_move_range? x
           Tello::Client.return_bool send("#{cmd.to_s} #{x}")
@@ -52,6 +71,7 @@ module Tello
         end
       end
     end
+    alias_method :front, :forward
 
     # Turn clockwise or counterclockwise
     [:cw, :ccw].each do |cmd|
@@ -189,6 +209,14 @@ module Tello
       send('temp?')
     end
 
+    def sdk
+      send('sdk?')
+    end
+
+    def sn
+      send('sn?')
+    end
+
     # Get Wi-Fi signal-to-noise ratio (SNR); if parameters, set SSID and password
     def wifi(ssid: nil, pass: nil)
       if ssid && pass
@@ -198,8 +226,14 @@ module Tello
       end
     end
 
-    # Stop all motors immediately
+    # stop: hovers in the air per Tello SDK 2.0 User Guide
     def stop
+      Tello::Client.return send('stop')
+    end
+    alias_method :hover, :stop
+
+    # Halt all motors immediately
+    def halt
       Tello::Client.return_bool send('emergency')
     end
 

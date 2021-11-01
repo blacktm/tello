@@ -8,13 +8,21 @@ module Tello
 
     class << self
 
-      # Create a Tello UDP connection
-      def connect(ssid = nil)
+      # Create a UDP connection
+      def connect(ssid = nil, ip = nil, bind_port=8890)
 
         # Connect to Tello wifi
-        unless Tello::Wifi.connect(ssid)
-          puts "#{'Error:'.error} Could not connect to Tello 😢"
-          return false
+        if ssid.to_s.upcase == 'AP'
+          unless valid_ipv4?(ip)
+            puts "Error: Cannot connect to Tello#{$edu} in AP mode due to invalid IPv4: '#{ip}'"
+            return false
+          end
+        else
+          if !Tello::Wifi.connect(ssid)
+            puts "Error: Could not connect to Tello#{$edu} 😢"
+            return false
+          end
+          ip = '192.168.10.1'
         end
 
         # If already connected, disconnect
@@ -23,13 +31,16 @@ module Tello
           disconnect
         end
 
+        p({ssid: ssid, ip: ip})
+
         # Set IP and port numbers
-        @ip = Tello.testing ? 'localhost' : '192.168.10.1'
+        @ip = (Tello.testing ? 'localhost' : ip)
         @port = 8889
 
         # Create UDP client, bind to a previous source IP and port if availble
         @client = UDPSocket.new unless @client
         if @source_ip && @source_port
+          p({source_ip: @source_ip, source_port: @source_port})
           @client.bind(@source_ip, @source_port)
         end
 
@@ -41,7 +52,7 @@ module Tello
         # Create server to get Tello state
         unless @state_server
           @state_server = UDPSocket.new
-          @state_server.bind('0.0.0.0', 8890)
+          @state_server.bind('0.0.0.0', bind_port)
         end
 
         # Check to see if test server is up
@@ -50,8 +61,8 @@ module Tello
           @client.send('command', 0)
           sleep 0.5
           unless read_nonblock
-            puts "\n#{'Error:'.error} Could not find Tello test server.",
-                 "Did you run `tello server` in another terminal window?"
+            puts "\n#{'Error:'.error} Could not find Tello#{$edu} test server.",
+                  "Did you run `tello#{$edu.to_s.downcase} server` in another terminal window?"
             return false
           end
           puts "connected!"
@@ -69,10 +80,10 @@ module Tello
               begin
                 @client.send('command', 0)
               rescue Errno::EADDRNOTAVAIL
-                puts "#{'Error:'.error} No response from Tello! Try reconnecting."
+                puts "#{'Error:'.error} No response from Tello#{$edu}! Try reconnecting."
                 @ping.exit
               end
-              sleep 15
+              sleep(14.5)
             end
           end
 
@@ -85,7 +96,8 @@ module Tello
           end
         end
 
-        puts "Ready to fly! 🚁"; true
+        puts "Ready to fly! 🚁"
+        true
       end
 
       # Get Tello connection status
@@ -93,7 +105,7 @@ module Tello
         if @connected
           true
         else
-          puts "Tello is not yet connected. Run `connect` first."
+          puts "Tello#{$edu} is not yet connected. Run `connect` first."
           false
         end
       end
@@ -146,7 +158,11 @@ module Tello
         if res then res.to_i else res end
       end
 
-    end
+      def valid_ipv4?(ip)
+        ## May be improved further
+        (ip.to_s) =~ /^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$/
+      end
 
+    end
   end
 end
