@@ -1,8 +1,8 @@
 # Fly Tello with Ruby!
 
-This gem will let you fly the [Tello drone](https://www.ryzerobotics.com/tello) using Ruby.
+This gem will let you fly the [Tello drone](https://www.ryzerobotics.com/tello) or [Tello EDU drone](https://www.ryzerobotics.com/tello-edu) using Ruby.
 
-## Your first flight
+## Your first Tello flight
 
 If you don't already have one, get a Tello drone! A [number of retailers](https://www.ryzerobotics.com/where-to-buy) carry them for $99 USD. (You _can_ also use the [test server](#test-server) packaged with this gem to simulate commands, but that's not nearly as fun.)
 
@@ -45,7 +45,53 @@ Nice! For now, let's land the drone and learn about what else it can do.
 ```ruby
 > land
 ```
+## Your first Tello EDU flight
 
+This is a bit more involved process, since you have to set up the Tello EDU drones (assuming you have two of them) to connect to your `local WiFi` as described in this [Video](https://www.youtube.com/watch?v=cIsddY4SKgA&t=162s)
+
+The gem comes with a command-line utility, named `telloedu`. We can use it to launch an interactive console and send commands to the drones (one at a time for now). Go ahead and start the console:
+
+```
+$ telloedu console
+```
+
+Now, set the drones on the ground clear of any objects (including yourself) and press the button to turn them on. Wait for them to boot up, until the status light is blinking yellow.
+
+In your interactive console, connect to the drone like so (the `>` here is just to note it's a Ruby prompt — don't type that):
+
+```ruby
+> connect(:ap, 'ipv4.of.drone.1') ### e.g. '192.168.0.101'
+```
+
+If you've successfully connected to the drone, you should see a "ready to fly" message. You're now ready to take flight!
+
+```ruby
+> takeoff
+```
+
+The drone should now be hovering. At this point, you can run all sorts of flight commands, described in the next section. For now, let's land the drone and learn about what else it can do.
+
+```ruby
+> land
+```
+
+Now, connect to the other drone like so:
+
+```ruby
+> connect(:ap, 'ipv4.of.drone.2') ### e.g. '192.168.0.102'
+```
+
+If you've successfully connected to the drone, you should see a "ready to fly" message. You're now ready to take flight!
+
+```ruby
+> takeoff
+```
+
+Now, let's land the drone and learn about what else it can do.
+
+```ruby
+> land
+```
 ## Flight commands
 
 This gem comes packed with commands you can send to the Tello drone. Let's go through each one.
