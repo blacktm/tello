@@ -72,6 +72,7 @@ module Tello
       end
     end
     alias_method :front, :forward
+    alias_method :backward, :back
 
     # Turn clockwise or counterclockwise
     [:cw, :ccw].each do |cmd|
@@ -215,6 +216,15 @@ module Tello
 
     def sn
       send('sn?')
+    end
+
+    def bye!
+      ## Tell the server to exit gracefully.
+      ## Only applicable in test mode.
+      if Tello.testing
+        send('bye!')
+        exit(0) if connected?
+      end
     end
 
     # Get Wi-Fi signal-to-noise ratio (SNR); if parameters, set SSID and password
