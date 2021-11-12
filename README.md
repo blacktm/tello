@@ -47,15 +47,22 @@ Nice! For now, let's land the drone and learn about what else it can do.
 ```
 ## Your first Tello EDU flight
 
-This is a bit more involved process, since you have to set up the Tello EDU drones (assuming you have two of them) to connect to your `local WiFi` as described in this [Video](https://www.youtube.com/watch?v=cIsddY4SKgA&t=162s)
+The Tello EDU drones operate in two mutually exclusive modes: the AP mode and the Station Mode. The AP mode is the default Out-Of-The-Box mode which lets you control the Tello EDU as regular Tello drone: one controller per drone. Once you test that the drone is working as expected, you need to manually switch it the "Station" mode which allows a single controller to control a swarm of multiple Tello EDU drones, all of which are in the station mode.
 
-The gem comes with a command-line utility, named `telloedu`. We can use it to launch an interactive console and send commands to the drones (one at a time for now). Go ahead and start the console:
+To set the Tello EDU in Station mode, you should use the command-line utility that comes with this gem, named `telloedu`. You can use it to launch an interactive console and send commands to the Tello EDU drones (one at a time for now). Go ahead and start the console (be sure to connect to the drone's WIFI before you start sending commands):
 
 ```
 $ telloedu console
+Ready to receive TelloEDU commands. Type "exit" to quit.
+[1] pry(main)> connect
+
+[2] pry(main)> ap 'Your-Wifi-SSID', 'Your-WIFI-password' ## this should reboot the drone in about 3 seconds
+
+[3] pry(main)> quit
 ```
 
-Now, set the drones on the ground clear of any objects (including yourself) and press the button to turn them on. Wait for them to boot up, until the status light is blinking yellow.
+
+Now, set the drones on the ground, clear of any objects (including yourself) and press the button to turn them on. Wait for them to boot up, until the status light is blinking yellow.
 
 In your interactive console, connect to the drone like so (the `>` here is just to note it's a Ruby prompt — don't type that):
 

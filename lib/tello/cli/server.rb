@@ -9,7 +9,8 @@ server.bind('localhost', PORT)
 
 puts "Starting Tello test server...".bold, "Listening on udp://localhost:#{PORT}"
 
-loop do
+bye = false
+while (not bye) do
   msg, addr = server.recvfrom(100)
   puts "#{"==>".green} Received: \"#{msg}\", from #{addr[3]}:#{addr[1]}"
 
@@ -44,8 +45,9 @@ loop do
   when 'wifi?'
     #=> snr
     res = "90\r\n"
-  when 'whatever'
-    res = "unknown command: whatever"
+  when 'bye!'
+    res = 'good bye!'
+    bye = true
   else
     #=> 'ok' or 'error'
     res = 'ok'
